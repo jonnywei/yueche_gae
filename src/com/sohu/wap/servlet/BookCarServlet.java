@@ -3,7 +3,9 @@ package com.sohu.wap.servlet;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Enumeration;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -17,14 +19,47 @@ import com.sohu.wap.HaijiaMain;
 public class BookCarServlet extends HttpServlet {
 	public void doGet(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException {
-		resp.setContentType("text/html");
+		resp.setContentType("application/json");
+		JSONObject json = new JSONObject();
+		Cookie[] cookies =req.getCookies();
+		if (cookies != null){
+			for (Cookie cookie : cookies){
+				try {
+					json.put(cookie.getName(), cookie.getValue());
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+	
 		
-		resp.getWriter().println("Yueche");
-		resp.getWriter().println("<form method='post'>");
-		resp.getWriter().println("start:<input type='text' size='4' name='start' ><br/>");
+		JSONObject jh = new JSONObject();
+		Enumeration header =req.getHeaderNames();
 		
-		resp.getWriter().println("<input type='submit' value='submit' ><br/>");
-		resp.getWriter().println("</form>");
+		while (header.hasMoreElements()){
+			String name = (String)header.nextElement();
+			try {
+				jh.put(name, req.getHeader(name));
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		JSONObject result = new JSONObject();
+		
+		try {
+			result.put("cookie", json);
+			result.put("header", jh);
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		
+		resp.getWriter().println(result.toString());
+		 
 	}
 	
 	public void doPost(HttpServletRequest req, HttpServletResponse resp)
